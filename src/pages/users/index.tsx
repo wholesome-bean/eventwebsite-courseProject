@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import styles from '../../styles/Users.module.css'
 
 /* runs on build time not run time */
@@ -19,11 +20,9 @@ const Users = ({users}) => {
     <div>
       <h1>Users</h1>
       {users.map(user => (
-        <div key = {user.id}> 
-        <a className={styles.single}>
-          <h3>{user.name}</h3>
-        </a>
-        </div>
+        <Link href= {'/users/' + user.id} key = {user.id}> 
+          <h3 className={styles.single}>{user.name}</h3>
+        </Link>
       ))}
     </div>
   );
