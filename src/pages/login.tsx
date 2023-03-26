@@ -27,7 +27,7 @@ export default function LoginPage() {
     if (response.ok) {
       // If the login is successful, store the JWT in local storage or a cookie
       localStorage.setItem('token', data.token);
-      router.push('/dashboard'); // Redirect the user to the dashboard
+      router.push(`/profile`); // Redirect the user to the profile page
     } else {
       // If the login fails, display an error message
       alert(data.message || 'Login failed');

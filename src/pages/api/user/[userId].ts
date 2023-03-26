@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createPool } from 'mysql2/promise';
-import jwt from 'jsonwebtoken';
 
 const pool = createPool({
   host: 'localhost',
@@ -13,30 +12,23 @@ const pool = createPool({
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    const { email, password } = req.body;
+  if (req.method === 'GET') {
+    const userId = req.query.userId;
 
-    // Validate the email and password against the database
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
 
     const connection = await pool.getConnection();
     try {
-      const [rows] = await connection.query('SELECT * FROM super_admins WHERE email = ?', [email]);
+      const [rows] = await connection.query('SELECT * FROM super_admins WHERE id = ?', [userId]);
 
       if (rows.length === 0) {
-        return res.status(401).json({ message: 'Invalid email or password' });
+        return res.status(404).json({ message: 'User not found' });
       }
 
       const user = rows[0];
-
-      if (user.password !== password) {
-        return res.status(401).json({ message: 'Invalid email or password' });
-      }
-
-      // If the email and password are valid, create a JWT for the user
-      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-      // Add the user ID to the response
-      res.status(200).json({ token, userId: user.id });
+      res.status(200).json(user);
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: 'Internal server error' });
