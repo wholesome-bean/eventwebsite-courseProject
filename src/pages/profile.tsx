@@ -4,7 +4,8 @@ import { useRouter } from 'next/router';
 interface User {
   id: number;
   email: string;
-  // Include any other fields you want to display from the 'super_admins' table
+  name: string;
+  // Include any other fields you want to display from the 'users' table
 }
 
 export default function Profile() {
@@ -59,7 +60,7 @@ export default function Profile() {
 
   return (
     <div>
-      <h1>Welcome, {user.email}!</h1>
+      <h1>Welcome, {user.name}!</h1>
       <p>Your user ID is: {user.id}</p>
       {/* Add any other fields you want to display from the 'super_admins' table */}
     </div>
