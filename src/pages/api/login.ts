@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const connection = await pool.getConnection();
     try {
-      const [rows] = await connection.query('SELECT * FROM super_admins WHERE email = ?', [email]);
+      const [rows] = await connection.query('SELECT * FROM users WHERE email = ?', [email]);
 
       if (rows.length === 0) {
         return res.status(401).json({ message: 'Invalid email or password' });

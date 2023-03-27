@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const connection = await pool.getConnection();
     try {
-      const [rows] = await connection.query('SELECT * FROM super_admins WHERE id = ?', [userId]);
+      const [rows] = await connection.query('SELECT * FROM users WHERE id = ?', [userId]);
 
       if (rows.length === 0) {
         return res.status(404).json({ message: 'User not found' });
