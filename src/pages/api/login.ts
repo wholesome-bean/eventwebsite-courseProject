@@ -33,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // If the email and password are valid, create a JWT for the user
-      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      const token = jwt.sign({ userId: user.id, university_id: user.university_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
       // Add the user ID to the response
       res.status(200).json({ token, userId: user.id });
