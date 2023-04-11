@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import jwt from 'jsonwebtoken';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 interface Event {
   id: number;
@@ -102,7 +103,7 @@ export default function EventsPage() {
 
   return (
     <div>
-      <h1>Events</h1>
+      <h1>Events <button><Link href ="/create-event">Create an Event!</Link></button></h1>
       <div>
         {eventTypes.map(({ id, type }) => (
           <label key={id}>
