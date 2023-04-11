@@ -4,7 +4,7 @@ import styles from '../styles/Home.module.css';
 export default function Home() {
   return (
     <div>
-      <h1 className={styles.title}>Homepage</h1>
+      <h1 className={styles.title}>Welcome!</h1>
       <div>
         <Link href="/login">
           <button>Login</button>

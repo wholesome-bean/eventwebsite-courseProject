@@ -17,6 +17,7 @@ interface University {
 export default function SignUpPage() {
   const [form, setForm] = useState<SignUpForm>({ name: '', email: '', password: '', university_id: 0 });
   const [universities, setUniversities] = useState<University[]>([]);
+  const [error, setError] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export default function SignUpPage() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError('');
 
     const response = await fetch('/api/signup', {
       method: 'POST',
@@ -42,7 +44,8 @@ export default function SignUpPage() {
     if (response.ok) {
       router.push('/login');
     } else {
-      console.error('Sign up failed');
+      const errorData = await response.json();
+      setError(errorData.message);
     }
   };
 
@@ -81,6 +84,11 @@ export default function SignUpPage() {
         </select>
       </div>
       <button type="submit">Sign Up</button>
+      {error && (
+        <div>
+          <p style={{ color: 'red' }}>{error}</p>
+        </div>
+      )}
     </form>
   );
 }

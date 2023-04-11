@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import jwt from 'jsonwebtoken';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 interface RSO {
   RID: number;
@@ -55,14 +56,44 @@ export default function RSOPage() {
     setSelectedRso(null);
   };
 
-  const joinRso = () => {
+  const joinRso = async () => {
     console.log('Join RSO', selectedRso);
-    // Add your code to handle joining the RSO here
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+  
+    const decodedToken: any = jwt.decode(token);
+    const userId = decodedToken?.userId;
+  
+    if (!userId) {
+      router.push('/login');
+      return;
+    }
+  
+    const response = await fetch('/api/add-rso-member', {
+      method: 'POST',
+      body: JSON.stringify({ userId, rsoId: selectedRso.RID }),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  
+    if (response.ok) {
+      alert('You have successfully joined the RSO');
+    } else {
+      const error = await response.json();
+      console.error('Failed to join RSO:', error.message);
+      alert('Failed to join RSO');
+    }
   };
 
   return (
     <div>
-      <h1>RSOs</h1>
+      <h1>RSOs <button><Link href ="/create-rso">Create an RSO!</Link></button></h1>
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around' }}>
         {rsoList.map((rso) => (
           <div

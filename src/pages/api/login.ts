@@ -16,11 +16,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'POST') {
     const { email, password } = req.body;
 
-    // Validate the email and password against the database
-
     const connection = await pool.getConnection();
     try {
-      const [rows] = await connection.query('SELECT * FROM users WHERE email = ?', [email]);
+      // Check both the 'users' and 'super_admins' tables
+      const [userRows] = await connection.query('SELECT *, "user" as role FROM users WHERE email = ?', [email]);
+      const [superAdminRows] = await connection.query('SELECT *, "superadmin" as role FROM super_admins WHERE email = ?', [email]);
+
+      // Combine the results from both tables
+      const rows = [...userRows, ...superAdminRows];
 
       if (rows.length === 0) {
         return res.status(401).json({ message: 'Invalid email or password' });
@@ -31,9 +34,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (user.password !== password) {
         return res.status(401).json({ message: 'Invalid email or password' });
       }
-
+       
       // If the email and password are valid, create a JWT for the user
-      const token = jwt.sign({ userId: user.id, university_id: user.university_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      const token = jwt.sign({ userId: user.id, university_id: user.university_id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
       // Add the user ID to the response
       res.status(200).json({ token, userId: user.id });
@@ -47,3 +50,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(405).json({ message: 'Method not allowed' });
   }
 }
+

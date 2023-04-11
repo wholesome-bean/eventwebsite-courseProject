@@ -25,38 +25,40 @@ const eventTypes: EventType[] = [
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
+  const [userRsoEvents, setUserRsoEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
-  const [filters, setFilters] = useState<{ [key: number]: boolean }>({ 1: false, 2: false, 3: false });
+  const [filters, setFilters] = useState<{ [key: number]: boolean }>({ 1: true, 2: true, 3: true });
   const router = useRouter();
 
   useEffect(() => {
     const fetchEvents = async () => {
       const token = localStorage.getItem('token');
-
+    
       if (!token) {
         router.push('/login');
         return;
       }
-
-      // Decode the token to get the user's university_id
+    
+      // Decode the token to get the user's university_id and userId
       const decodedToken: any = jwt.decode(token);
       const university_id = decodedToken?.university_id;
-
-      if (!university_id) {
+      const userId = decodedToken?.userId;
+    
+      if (!university_id || !userId) {
         router.push('/login');
         return;
       }
-
-      const response = await fetch(`/api/events?university_id=${university_id}`, {
+    
+      const response = await fetch(`/api/events?university_id=${university_id}&user_id=${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
+    
       if (response.ok) {
         const eventsData = await response.json();
-        setEvents(eventsData);
+        setEvents(Array.isArray(eventsData) ? eventsData : []);
       } else {
         console.error('Failed to fetch events');
       }
@@ -66,9 +68,20 @@ export default function EventsPage() {
   }, [router]);
 
   useEffect(() => {
-    const updatedFilteredEvents = events.filter((event) => filters[event.ETID]);
+  if (Array.isArray(events)) {
+    const updatedFilteredEvents = events.filter((event) => {
+      if (filters[event.ETID]) {
+        if (event.ETID === 1) {
+          return userRsoEvents.some((rsoEvent) => rsoEvent.id === event.id);
+        }
+        return true;
+      }
+      return false;
+    });
+    
     setFilteredEvents(updatedFilteredEvents);
-  }, [events, filters]);
+  }
+}, [events, filters, userRsoEvents]);
 
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
@@ -101,7 +114,7 @@ export default function EventsPage() {
             {type}
           </label>
         ))}
-      </div>
+      </div> 
       <div>
         {filteredEvents.map((event) => (
           <button

@@ -35,13 +35,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const connection = await pool.getConnection();
       try {
-        const [user] = await connection.query('SELECT * FROM users WHERE id = ?', [decodedToken.userId]);
-        if (!user || user.length === 0) {
-          return res.status(404).json({ message: 'User not found' });
-        }
-
-        const [events] = await connection.query('SELECT * FROM events WHERE university_id = ?', [university_id]);
-        res.status(200).json(events);
+        const [events] = await connection.query(`
+          SELECT e.* 
+          FROM Events e
+          WHERE e.university_id = ?
+          AND (
+            e.ETID != 1
+            OR EXISTS (
+              SELECT 1
+              FROM RSO_Members rm
+              JOIN RSOs r ON rm.RID = r.RID
+              WHERE rm.UID = ? AND e.university_id = r.university_id
+            )
+          );
+        `, [university_id, decodedToken.userId]);
+        
+        res.status(200).json(events || []);
       } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Internal server error' });
