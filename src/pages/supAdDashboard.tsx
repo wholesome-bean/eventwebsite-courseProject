@@ -46,14 +46,47 @@ export default function SupAdDashboard() {
   };
 
   const handleApprove = async (rso) => {
-    // Send approve request to your API
-    // Update the local state
+    const response = await fetch('/api/approveRso', {
+      method: 'PUT',
+      body: JSON.stringify({ RID: rso.RID }),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+  
+    if (response.ok) {
+      // Update the local state
+      setRsos(
+        rsos.map((item) =>
+          item.RID === rso.RID ? { ...item, Status: 1 } : item
+        )
+      );
+      setPopupOpen(false);
+    } else {
+      alert('Failed to approve RSO');
+    }
   };
-
+  
   const handleReject = async (rso) => {
-    // Send reject request to your API
-    // Update the local state
+    const response = await fetch('/api/rejectRso', {
+      method: 'DELETE',
+      body: JSON.stringify({ RID: rso.RID }),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+  
+    if (response.ok) {
+      // Update the local state
+      setRsos(rsos.filter((item) => item.RID !== rso.RID));
+      setPopupOpen(false);
+    } else {
+      alert('Failed to reject RSO');
+    }
   };
+  
 
   return (
     <div>
