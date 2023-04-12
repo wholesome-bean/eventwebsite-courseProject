@@ -91,6 +91,41 @@ export default function RSOPage() {
     }
   };
 
+  const leaveRso = async () => {
+    console.log('Leave RSO', selectedRso);
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+  
+    const decodedToken: any = jwt.decode(token);
+    const userId = decodedToken?.userId;
+  
+    if (!userId) {
+      router.push('/login');
+      return;
+    }
+  
+    const response = await fetch('/api/remove-rso-member', {
+      method: 'DELETE',
+      body: JSON.stringify({ userId, rsoId: selectedRso.RID }),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  
+    if (response.ok) {
+      alert('You have successfully left the RSO');
+    } else {
+      const error = await response.json();
+      console.error('Failed to leave RSO:', error.message);
+      alert('Failed to leave RSO');
+    }
+  };
+
   return (
     <div>
       <h1>RSOs <button><Link href ="/create-rso">Create an RSO!</Link></button></h1>
@@ -142,6 +177,7 @@ export default function RSOPage() {
             <h2>{selectedRso.name}</h2>
             <p>{selectedRso.description}</p>
             <button onClick={joinRso}>Join</button>
+            <button onClick={leaveRso}>Leave</button>
           </div>
         </div>
       )}
