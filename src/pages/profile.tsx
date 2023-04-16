@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import RSOItem from '/components/RSOItem';
 
 // Define the User and RSO interfaces
 interface User {
@@ -19,6 +20,7 @@ export default function Profile() {
   const [user, setUser] = useState<User | null>(null);
   const [memberOfRSOs, setMemberOfRSOs] = useState<RSO[]>([]);
   const [adminOfRSOs, setAdminOfRSOs] = useState<RSO[]>([]);
+  const [activePopup, setActivePopup] = useState<number | null>(null);
 
   const router = useRouter();
 
@@ -91,24 +93,34 @@ export default function Profile() {
     <div>
       <h1>Welcome, {user.name}!</h1>
       <p>Your user ID is: {user.id}</p>
-
       <h2>RSOs you are a member of:</h2>
       <ul>
-        {memberOfRSOs.map((rso) => (
-          <li key={rso.RID}>
-            {rso.name} ({rso.description})
-          </li>
-        ))}
+      {memberOfRSOs
+          .filter((rso) => !adminOfRSOs.some((adminRso) => adminRso.RID === rso.RID))
+          .map((rso) => (
+            <RSOItem
+              key={rso.RID}
+              rso={rso}
+              isAdmin={false}
+              activePopup={activePopup}
+              setActivePopup={setActivePopup}
+            />
+          ))}
       </ul>
 
       <h2>RSOs you are an admin of:</h2>
       <ul>
-      {adminOfRSOs.map((rso) => (
-      <li key={rso.RID}>
-        {rso.name} ({rso.description})
-      </li>
-      ))}
-      </ul><button onClick={() => router.push('/events')}>Go to Events</button>
-</div>
-);
+        {adminOfRSOs.map((rso) => (
+          <RSOItem
+            key={rso.RID}
+            rso={rso}
+            isAdmin={true}
+            activePopup={activePopup}
+            setActivePopup={setActivePopup}
+          />
+        ))}
+      </ul>
+      <button onClick={() => router.push('/events')}>Go to Events</button>
+    </div>
+  );
 }
