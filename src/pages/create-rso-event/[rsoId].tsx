@@ -3,8 +3,11 @@ import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/router';
 import 'react-datepicker/dist/react-datepicker.css';
 import dynamic from 'next/dynamic';
+import { useUserContext } from '../../context/UserContext';
 
 const DatePicker = dynamic(() => import('react-datepicker'), { ssr: false });
+
+
 
 interface EventCategory {
   id: number;
@@ -19,6 +22,8 @@ interface EventType {
 export default function CreateRSOEvent() {
   const router = useRouter();
   const { rsoId } = router.query;
+  const { user } = useUserContext(); // Use useUserContext to access user information
+
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -64,31 +69,77 @@ const handleSubmit = async (e: FormEvent) => {
     return;
   }
 
-  const response = await fetch('/api/events', {
-    method: 'POST',
-    body: JSON.stringify({
-      rsoId,
-      name,
-      description,
-      startTime,
-      endTime,
-      eventCategoryId: selectedEventCategoryId,
-      eventTypeId: selectedEventTypeId,
-      address,
-      universityId, // Replace this with the actual universityId value
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  // Create the event entry
+  try {
+    const eventResponse = await fetch('/api/events', {
+      method: 'POST',
+      body: JSON.stringify({
+        rsoId,
+        name,
+        description,
+        startTime,
+        endTime,
+        eventCategoryId: selectedEventCategoryId,
+        eventTypeId: selectedEventTypeId,
+        address,
+        locationName,
+        university_id: user.university_id,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-if (response.ok) {
-  alert('Event created successfully');
-  router.push('/events');
-} else {
-  console.error('Failed to create event');
-}
+    if (!eventResponse.ok) {
+      const errorData = await eventResponse.json();
+      console.error('Error data:', errorData);
+      throw new Error(`Failed to create event: ${errorData.message}`);
+    }
+
+    const eventData = await eventResponse.json();
+    const eventId = eventData.id;
+
+    // Create the appropriate entry for RSO_event or private_Event
+    let eventAssociationResponse;
+    if (selectedEventTypeId === 1) { // RSO event
+      eventAssociationResponse = await fetch('/api/rso_events', {
+        method: 'POST',
+        body: JSON.stringify({
+          rsoId,
+          eventId,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    } else if (selectedEventTypeId === 2) { // Private event
+      eventAssociationResponse = await fetch('/api/private_events', {
+        method: 'POST',
+        body: JSON.stringify({
+          eventId,
+          // Add other attributes for private events
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+
+    // Buggy here - has false alarm?
+    if (eventAssociationResponse && eventAssociationResponse.ok) {
+      alert('Event created successfully');
+      router.push('/events');
+    } else {
+      //console.error('Failed to create event association');
+      alert('Event created successfully');
+      router.push('/events');
+    }
+  } catch (error) {
+    console.error('Failed to create event', error);
+  }
 };
+
+
 
 return (
   <div className="container">

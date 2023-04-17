@@ -51,7 +51,8 @@ export default function EventsPage() {
         return;
       }
     
-      const response = await fetch(`/api/events?university_id=${university_id}&user_id=${userId}`, {
+      // Update the API URL to include the user's university_id and user_id
+      const response = await fetch(`/api/getEvents?university_id=${university_id}&user_id=${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -64,6 +65,7 @@ export default function EventsPage() {
         console.error('Failed to fetch events');
       }
     };
+    
 
     fetchEvents();
   }, [router]);
@@ -103,7 +105,7 @@ export default function EventsPage() {
 
   return (
     <div>
-      <h1>Events <button><Link href ="/create-event">Create an Event!</Link></button></h1>
+      <h1>Events <button><Link href ="/create-public-event">Create an Event!</Link></button></h1>
       <div>
         {eventTypes.map(({ id, type }) => (
           <label key={id}>
