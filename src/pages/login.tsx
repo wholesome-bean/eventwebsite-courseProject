@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import jwt from 'jsonwebtoken';
+import { useUserContext } from '../context/UserContext';
 
 interface LoginForm {
   email: string;
@@ -10,6 +11,7 @@ interface LoginForm {
 export default function LoginPage() {
   const [form, setForm] = useState<LoginForm>({ email: '', password: '' });
   const router = useRouter();
+  const { setUser } = useUserContext();
 
   // Check if the superadmin query parameter is present
   const isSuperAdminLogin = router.query.superadmin === 'true';
@@ -39,6 +41,13 @@ export default function LoginPage() {
   
     const decodedToken: any = jwt.decode(data.token);
     const { role } = decodedToken;
+
+    setUser({
+      id: decodedToken.userId,
+      email: decodedToken.email,
+      name: decodedToken.name,
+      university_id: decodedToken.university_id,
+    });
   
     if (role === 'superadmin') {
       router.push('/supAdDashboard');

@@ -1,5 +1,5 @@
 // components/RSOItem.tsx
-import { RSO } from '../pages/profile';
+import { RSO } from '/pages/profile';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 

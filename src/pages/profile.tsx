@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import RSOItem from '/components/RSOItem';
+import RSOItem from '../../components/RSOItem';
+import { useUserContext } from '../context/UserContext';
 
 // Define the User and RSO interfaces
 interface User {
   id: number;
   email: string;
   name: string;
+  university_id: number;
 }
 
 interface RSO {
@@ -17,10 +19,12 @@ interface RSO {
 }
 
 export default function Profile() {
-  const [user, setUser] = useState<User | null>(null);
+  //const [user, setUser] = useState<User | null>(null);
   const [memberOfRSOs, setMemberOfRSOs] = useState<RSO[]>([]);
   const [adminOfRSOs, setAdminOfRSOs] = useState<RSO[]>([]);
   const [activePopup, setActivePopup] = useState<number | null>(null);
+  const { user } = useUserContext();
+  
 
   const router = useRouter();
 
@@ -53,7 +57,7 @@ export default function Profile() {
 
         if (userResponse.ok) {
           const userData = await userResponse.json();
-          setUser(userData);
+          //setUser(userData);
 
           // Fetch the RSO data
           const memberOfRSOsResponse = await fetch(`/api/user/${decodedToken.userId}/memberOfRSOs`);
