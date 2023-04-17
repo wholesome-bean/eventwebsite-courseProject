@@ -7,6 +7,7 @@ interface User {
   id: number;
   email: string;
   name: string;
+  university_id: number;
 }
 
 interface RSO {

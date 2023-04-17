@@ -1,0 +1,75 @@
+.leaflet-geosearch-container {
+    background-color: white;
+    opacity: 1;
+  }
+  
+  .leaflet-geosearch-container input {
+    background-color: white;
+    opacity: 1;
+  }
+  
+  .leaflet-geosearch-container .leaflet-geosearch-result-list {
+    background-color: white;
+    opacity: 1;
+  }
+  
+  .leaflet-geosearch-container .leaflet-geosearch-result-item {
+    background-color: white;
+    opacity: 1;
+  }
+  
+  .input-section {
+    margin-bottom: 20px;
+  }
+  
+  .date-picker {
+    position: relative;
+    z-index: 1000;
+  }
+
+  .date-picker-container {
+    position: relative;
+    z-index: 1000;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .time-inputs {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  
+  .input-container {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  input,
+  textarea,
+  select {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .date-picker-container {
+    position: relative;
+    z-index: 1000;
+  }
+  
+  button {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  
