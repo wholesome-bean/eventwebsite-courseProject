@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useCallback } from 'react';
 
 interface Event {
-  id: number;
+  EID: number;
   name: string;
   description: string;
   date: string;
@@ -24,6 +24,31 @@ const eventTypes: EventType[] = [
   { id: 2, type: 'Private' },
   { id: 3, type: 'Public' },
 ];
+
+const getAverageRating = (eventId: number, ratings: any[]) => {
+  const eventRatings = ratings.filter((rating) => rating.EID === eventId);
+  const totalRatings = eventRatings.length;
+
+  if (totalRatings === 0) {
+    return 'No ratings yet';
+  }
+
+  const sum = eventRatings.reduce((acc, rating) => acc + rating.rating, 0);
+  const average = (sum / totalRatings).toFixed(1);
+
+  return `${average}/5`;
+};
+
+const handleUpdateComment = (commentId) => {
+  console.log("Update comment with ID:", commentId);
+  // Add your code to handle updating the comment here
+};
+
+const handleDeleteComment = async (commentId) => {
+  console.log("Delete comment with ID:", commentId);
+  // Add your code to handle deleting the comment here
+};
+
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -85,7 +110,7 @@ fetchEvents();
     const updatedFilteredEvents = events.filter((event) => {
       if (filters[event.ETID]) {
         if (event.ETID === 1) {
-          return userRsoEvents.some((rsoEvent) => rsoEvent.id === event.id);
+          return userRsoEvents.some((rsoEvent) => rsoEvent.EID === event.EID);
         }
         return true;
       }
@@ -99,11 +124,11 @@ fetchEvents();
 const handleEventClick = useCallback(async (event: Event) => {
   console.log('Clicked event:', event);
   setSelectedEvent(event);
-  setSelectedEventId(event.id);
+  setSelectedEventId(event.EID);
 
   // Fetch comments and ratings for the selected event
   const token = localStorage.getItem('token');
-const response = await fetch(`/api/getEventCommentsAndRatings?event_id=${event.id}`, {
+const response = await fetch(`/api/getEventCommentsAndRatings?event_id=${event.EID}`, {
   headers: {
     Authorization: `Bearer ${token}`,
   },
@@ -125,6 +150,9 @@ const handleSubmitComment = async (e) => {
 
   const token = localStorage.getItem('token');
   const decodedToken: any = jwt.decode(token);
+
+  console.log("Selected event:", selectedEvent);
+  console.log("Selected event ID:", selectedEventId);
 
 
   const userId = decodedToken?.userId;
@@ -159,7 +187,7 @@ const response = await fetch('/api/submitEventCommentAndRating', {
 if (response.ok) {
   const newComment = {
     CID: Math.random(),
-    EID: selectedEvent.id,
+    EID: selectedEvent.EID,
     UID: decodedToken.userId,
     Comment_text: commentText,
     comment_time: new Date(),
@@ -167,7 +195,7 @@ if (response.ok) {
 
   const newRating = {
     RID: Math.random(),
-    EID: selectedEvent.id,
+    EID: selectedEvent.EID,
     UID: decodedToken.userId,
     rating: rating,
   };
@@ -213,22 +241,22 @@ if (response.ok) {
         ))}
       </div> 
       <div>
-        {filteredEvents.map((event) => (
-          <button
-            key={event.id}
-            style={{
-              display: 'block',
-              marginBottom: '1rem',
-              cursor: 'pointer',
-              width: '100%',
-              height: '60px',
-            }}
-            onClick={() => handleEventClick(event)}
-          >
-            {event.name}
-          </button>
-        ))}
-      </div>
+  {filteredEvents.map((event) => (
+    <button
+      key={event.EID}
+      style={{
+        display: 'block',
+        marginBottom: '1rem',
+        cursor: 'pointer',
+        width: '100%',
+        height: '60px',
+      }}
+      onClick={() => handleEventClick(event)}
+    >
+      {event.name} - Average Rating: {getAverageRating(event.EID, ratings)}
+    </button>
+  ))}
+</div>
       {selectedEvent && (
         <div
           style={{
@@ -267,11 +295,12 @@ if (response.ok) {
         ))}
         <h3>Ratings</h3>
         {ratings.map((rating) => (
-          <div key={rating.RID}>
-            <p>{rating.rating}</p>
-            {/* Add more rating details if needed */}
-          </div>
-        ))}
+  <div key={rating.RID}>
+    <p>{rating.rating}/5</p>
+    {/* Add more rating details if needed */}
+  </div>
+))}
+
         <form onSubmit={handleSubmitComment}>
           <label>
             Comment:

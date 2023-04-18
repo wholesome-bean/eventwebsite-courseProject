@@ -5,8 +5,8 @@
 /* Apply font color */
 /* Apply font */
 body {
-  background: #e4dcdc;
-  color: #333;
+  background: #ffffff;
+  color: #000000;
   font-family: "Nunito";
 }
 
@@ -52,8 +52,8 @@ footer {
   text-align: center;
   padding: 30px 0;
   margin-top: 60px;
-  color: #7410d3;
-  border-top: 1px solid #12e95a;
+  color: #000000;
+  border-top: 1px solid #000000;
 }
 
 /* styling for 404 page */

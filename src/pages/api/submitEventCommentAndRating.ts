@@ -39,6 +39,7 @@ export default async function submitEventCommentAndRating(
     }
 
     const { event_id, user_id, comment_text, rating } = req.body;
+    console.log("Request body:", req.body);
 
     const connection = await pool.getConnection();
     try {

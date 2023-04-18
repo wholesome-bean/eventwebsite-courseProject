@@ -29,16 +29,3 @@ const Users = ({users}) => {
 }
 
 export default Users;
-
-/*
-export default function Users()
-{
-  return(
-    <div>
-      <h1>Users</h1>
-      <p>pppppppp</p>
-      <p>pppppppp</p>
-    </div>
-  )
-}
-*/
