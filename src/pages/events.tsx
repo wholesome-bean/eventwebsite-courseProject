@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import jwt from 'jsonwebtoken';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { useCallback } from 'react';
 
 interface Event {
   id: number;
@@ -28,13 +29,17 @@ export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [userRsoEvents, setUserRsoEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [filters, setFilters] = useState<{ [key: number]: boolean }>({ 1: true, 2: true, 3: true });
+  const [comments, setComments] = useState([]);
+  const [ratings, setRatings] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
     const fetchEvents = async () => {
       const token = localStorage.getItem('token');
+      
     
       if (!token) {
         router.push('/login');
@@ -91,9 +96,93 @@ fetchEvents();
   }
 }, [events, filters, userRsoEvents]);
 
-  const handleEventClick = (event: Event) => {
-    setSelectedEvent(event);
+const handleEventClick = useCallback(async (event: Event) => {
+  console.log('Clicked event:', event);
+  setSelectedEvent(event);
+  setSelectedEventId(event.id);
+
+  // Fetch comments and ratings for the selected event
+  const token = localStorage.getItem('token');
+const response = await fetch(`/api/getEventCommentsAndRatings?event_id=${event.id}`, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+
+  if (response.ok) {
+    const { comments: fetchedComments, ratings: fetchedRatings } = await response.json();
+    setComments(fetchedComments);
+    setRatings(fetchedRatings);
+  } else {
+    console.error('Failed to fetch comments and ratings');
+  }
+}, []);
+
+const handleSubmitComment = async (e) => {
+  e.preventDefault();
+  const commentText = e.target.commentText.value;
+  const rating = e.target.rating.value;
+
+  const token = localStorage.getItem('token');
+  const decodedToken: any = jwt.decode(token);
+
+
+  const userId = decodedToken?.userId;
+
+  //console.log(selectedEvent?.id);
+
+  if (!userId) {
+    router.push('/login');
+    return;
+  }
+
+   // Check if selectedEvent is set and has an id
+   if (!selectedEvent || !selectedEventId) {
+    console.error('Selected event is not set or has no id');
+    return;
+  }
+
+const response = await fetch('/api/submitEventCommentAndRating', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  },
+  body: JSON.stringify({
+    event_id: selectedEventId,
+    user_id: decodedToken.userId,
+    comment_text: commentText,
+    rating: rating,
+  }),
+});
+
+if (response.ok) {
+  const newComment = {
+    CID: Math.random(),
+    EID: selectedEvent.id,
+    UID: decodedToken.userId,
+    Comment_text: commentText,
+    comment_time: new Date(),
   };
+
+  const newRating = {
+    RID: Math.random(),
+    EID: selectedEvent.id,
+    UID: decodedToken.userId,
+    rating: rating,
+  };
+
+  setComments([...comments, newComment]);
+  setRatings([...ratings, newRating]);
+} else {
+  console.error('Failed to submit comment and rating');
+}
+
+
+  // Clear the input fields
+  e.target.commentText.value = '';
+  e.target.rating.value = '';
+};
 
   const closeOverlay = () => {
     setSelectedEvent(null);
@@ -169,6 +258,31 @@ fetchEvents();
             <p>{selectedEvent.description}</p>
             <p>{selectedEvent.location_name}</p>
             <p>{selectedEvent.location_address}</p>
+            <h3>Comments</h3>
+        {comments.map((comment) => (
+          <div key={comment.CID}>
+            <p>{comment.Comment_text}</p>
+            {/* Add more comment details if needed */}
+          </div>
+        ))}
+        <h3>Ratings</h3>
+        {ratings.map((rating) => (
+          <div key={rating.RID}>
+            <p>{rating.rating}</p>
+            {/* Add more rating details if needed */}
+          </div>
+        ))}
+        <form onSubmit={handleSubmitComment}>
+          <label>
+            Comment:
+            <input type="text" name="commentText" />
+          </label>
+          <label>
+            Rating:
+            <input type="number" name="rating" min="1" max="5" />
+          </label>
+          <button type="submit">Submit</button>
+        </form>
           </div>
         </div>
       )}
