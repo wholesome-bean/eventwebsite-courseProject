@@ -51,24 +51,29 @@ export default function EventsPage() {
         return;
       }
     
-      // Update the API URL to include the user's university_id and user_id
-      const response = await fetch(`/api/getEvents?university_id=${university_id}&user_id=${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // Fetch events from the API and include the selected filters
+const response = await fetch(
+  `/api/getEvents?university_id=${university_id}&user_id=${userId}&filters=${JSON.stringify(
+    Object.keys(filters).filter((key) => filters[parseInt(key, 10)])
+  )}`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
     
-      if (response.ok) {
-        const eventsData = await response.json();
-        setEvents(Array.isArray(eventsData) ? eventsData : []);
-      } else {
-        console.error('Failed to fetch events');
-      }
-    };
-    
+if (response.ok) {
+  const { events: eventsData, userRsoEvents: userRsoEventsData } = await response.json();
+  setEvents(Array.isArray(eventsData) ? eventsData : []);
+  setUserRsoEvents(Array.isArray(userRsoEventsData) ? userRsoEventsData : []);
+} else {
+  console.error('Failed to fetch events');
+}
+};
 
-    fetchEvents();
-  }, [router]);
+fetchEvents();
+}, [filters]);
 
   useEffect(() => {
   if (Array.isArray(events)) {
@@ -163,8 +168,6 @@ export default function EventsPage() {
             <h2>{selectedEvent.name}</h2>
             <p>{selectedEvent.description}</p>
             <p>{selectedEvent.location}</p>
-            <p>{new Date(selectedEvent.date).toLocaleString()}</p>
-            <button onClick={joinEvent}>Join</button>
           </div>
         </div>
       )}
