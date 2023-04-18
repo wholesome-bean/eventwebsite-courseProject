@@ -167,7 +167,8 @@ fetchEvents();
           >
             <h2>{selectedEvent.name}</h2>
             <p>{selectedEvent.description}</p>
-            <p>{selectedEvent.location}</p>
+            <p>{selectedEvent.location_name}</p>
+            <p>{selectedEvent.location_address}</p>
           </div>
         </div>
       )}

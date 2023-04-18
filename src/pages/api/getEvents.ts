@@ -49,14 +49,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const rsoCondition = rsoIds.length > 0 ? `OR (RSO_Events.RID IN (?) AND RSO_Events.isPrivate = FALSE)` : '';
       const query = `
-        SELECT Events.*, RSO_Events.RID, RSO_Events.isPrivate, Public_Events.status
-        FROM Events
-        LEFT JOIN RSO_Events ON Events.EID = RSO_Events.EID
-        LEFT JOIN Public_Events ON Events.EID = Public_Events.EID
-        WHERE Events.university_id = ?
-          AND (Events.ETID IN (?) ${rsoCondition})
-          AND (Public_Events.status = 1 OR Public_Events.status IS NULL)
-      `;
+  SELECT Events.*, RSO_Events.RID, RSO_Events.isPrivate, Public_Events.status, Events.location_name, Events.location_address
+  FROM Events
+  LEFT JOIN RSO_Events ON Events.EID = RSO_Events.EID
+  LEFT JOIN Public_Events ON Events.EID = Public_Events.EID
+  WHERE Events.university_id = ?
+    AND (Events.ETID IN (?) ${rsoCondition})
+    AND (Public_Events.status = 1 OR Public_Events.status IS NULL)
+`;
 
       const [events] = rsoIds.length > 0
         ? await connection.query(query, [university_id, filters, rsoIds])
